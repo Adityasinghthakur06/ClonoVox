@@ -1,7 +1,7 @@
 import os
 import threading
 import tkinter as tk
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, ttk
 import wave
 import simpleaudio as sa
 import speech_recognition as sr
@@ -63,11 +63,9 @@ def record_voice():
         recognizer.adjust_for_ambient_noise(source)
         print("Listening...")
         try:
-            while not stop_flag.is_set():
-                audio_data = recognizer.listen(source, timeout=1, phrase_time_limit=None)
-                if not stop_flag.is_set():
-                    print("Recording complete.")
-                    break
+            audio_data = recognizer.listen(source, timeout=10, phrase_time_limit=30)
+            if not stop_flag.is_set():
+                print("Recording complete.")
         except sr.WaitTimeoutError:
             if not stop_flag.is_set():
                 print("Listening timed out while waiting for phrase to start.")
@@ -174,34 +172,54 @@ def calculate_similarity(voice1_path, voice2_path):
 
 
 app = tk.Tk()
-app.title("AI Voice Synthesizer")
-app.geometry("400x500")
+app.title("ClonoVox - AI Voice Synthesizer")
+app.geometry("800x600")
+app.configure(bg='#2b2b2b')
 
-text_entry = tk.Entry(app, width=50)
+style = ttk.Style()
+style.theme_use("clam")
+
+style.configure("TButton", font=("Helvetica", 12), padding=10, relief="raised", background="#3e3e3e",
+                foreground="white")
+style.configure("TLabel", font=("Helvetica", 12), background="#2b2b2b", foreground="white")
+style.configure("TEntry", font=("Helvetica", 12), padding=10)
+style.configure("TFrame", background="#2b2b2b")
+
+frame = ttk.Frame(app, padding="20", style="TFrame")
+frame.pack(expand=True, fill=tk.BOTH)
+
+title_label = ttk.Label(frame, text="ClonoVox", font=("Helvetica", 24, "bold"), style="TLabel")
+title_label.pack(pady=10)
+
+text_entry = ttk.Entry(frame, width=50, style="TEntry")
 text_entry.pack(pady=10)
 
-start_record_button = tk.Button(app, text="Start Recording", command=start_recording)
+start_record_button = ttk.Button(frame, text="Start Recording", command=start_recording, style="TButton")
 start_record_button.pack(pady=10)
 
-stop_record_button = tk.Button(app, text="Stop Recording", command=stop_recording)
+stop_record_button = ttk.Button(frame, text="Stop Recording", command=stop_recording, style="TButton")
 stop_record_button.pack(pady=10)
 
-play_record_button = tk.Button(app, text="Play Recording", command=play_recording)
+play_record_button = ttk.Button(frame, text="Play Recording", command=play_recording, style="TButton")
 play_record_button.pack(pady=10)
 
-load_button = tk.Button(app, text="Load Voice Sample", command=threaded_load_voice_sample)
+load_button = ttk.Button(frame, text="Load Voice Sample", command=threaded_load_voice_sample, style="TButton")
 load_button.pack(pady=10)
 
-synthesize_button = tk.Button(app, text="Synthesize Voice", command=synthesize_speech)
+synthesize_button = ttk.Button(frame, text="Synthesize Voice", command=synthesize_speech, style="TButton")
 synthesize_button.pack(pady=10)
 
-play_synthesized_button = tk.Button(app, text="Play Synthesized Voice", command=synthesize_speech)
+play_synthesized_button = ttk.Button(frame, text="Play Synthesized Voice", command=synthesize_speech, style="TButton")
 play_synthesized_button.pack(pady=10)
 
-similarity_button = tk.Button(app, text="Check Similarity", command=check_similarity)
+similarity_button = ttk.Button(frame, text="Check Similarity", command=check_similarity, style="TButton")
 similarity_button.pack(pady=10)
 
-result_label = tk.Label(app, text="")
+result_label = ttk.Label(frame, text="", style="TLabel")
 result_label.pack(pady=10)
+
+transcription_text = tk.StringVar()
+transcription_label = ttk.Label(frame, textvariable=transcription_text, style="TLabel")
+transcription_label.pack(pady=10)
 
 app.mainloop()
